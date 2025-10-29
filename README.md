@@ -92,6 +92,7 @@ ExplorerBlurMica/
 ├── src/
 │   ├── config.ini               # Конфигурация
 │   ├── register.cmd             # Скрипт регистрации
+│   ├── ExplorerBlurMica.dll     # Основная библиотека
 │   └── uninstall.cmd            # Скрипт удаления
 └── ExplorerBlurMica.sln         # Решение Visual Studio
 ```
@@ -201,51 +202,6 @@ ExplorerBlurMica/
 - **Связи**: Регистрирует `ExplorerBlurMica.dll`
 - **Логика**: Автоматическая установка в систему
 
-## 3. Архитектура проекта
-
-### Общая структура
-
-```mermaid
-graph TB
-    A[dllmain.cpp] --> B[module.h]
-    B --> C[HookDef.h]
-    C --> D[DirectUITweaker.h]
-    D --> E[WindowListener.h]
-    
-    C --> F[minhook/MinHook.h]
-    F --> G[hook.cpp]
-    F --> H[trampoline.cpp]
-    
-    D --> I[Helper/Win32Helper.h]
-    D --> J[Helper/VersionHelper.h]
-    D --> K[Helper/ThemeHelper.h]
-    
-    L[config.ini] --> B
-    M[register.cmd] --> N[ExplorerBlurMica.dll]
-```
-
-### Потоки данных
-
-```mermaid
-sequenceDiagram
-    participant Explorer as Windows Explorer
-    participant DLL as ExplorerBlurMica.dll
-    participant Hook as API Hook System
-    participant DirectUI as DirectUI Tweaker
-    participant Config as Config.ini
-    
-    Explorer->>DLL: Загрузка DLL
-    DLL->>Config: Чтение конфигурации
-    DLL->>Hook: Инициализация хуков
-    Hook->>DirectUI: Регистрация обработчиков
-    
-    loop Отрисовка окна
-        Explorer->>Hook: Вызов API функции
-        Hook->>DirectUI: Перехват вызова
-        DirectUI->>DirectUI: Применение эффектов
-        DirectUI->>Explorer: Возврат результата
-    end
-```
 
 ### Архитектурные слои
 
@@ -255,7 +211,7 @@ sequenceDiagram
 4. **Слой утилит** (`Helper/`)
 5. **Слой конфигурации** (`config.ini`, скрипты)
 
-## 4. Библиотеки/фреймворки
+## 3. Библиотеки/фреймворки
 
 ### Основные зависимости
 
@@ -275,7 +231,7 @@ sequenceDiagram
 - **uxtheme.dll** - Темы Windows
 - **shlwapi.dll** - Shell Lightweight API
 
-## 5. Точка входа и запуск
+## 4. Точка входа и запуск
 
 ### Процесс запуска
 
@@ -302,7 +258,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 3. Перезапуск Explorer
 4. Автоматическая загрузка при запуске Explorer
 
-## 6. Архитектурные особенности
+## 5. Архитектурные особенности
 
 ### Нестандартные решения
 
@@ -317,3 +273,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 2. **Надежность**: RAII-паттерны предотвращают утечки памяти
 3. **Гибкость**: Система слушателей позволяет легко добавлять новые обработчики
 4. **Совместимость**: Поддержка различных версий Windows через `VersionHelper`
+
+### Технические особенности
+
+- **Поддержка x86/x64**: Кроссплатформенная компиляция
+- **Windows 10+**: Использование современных API
+- **DirectUI интеграция**: Глубокая интеграция с системой отрисовки
+- **Конфигурируемость**: Гибкая настройка через INI-файл
